@@ -95,6 +95,7 @@ pub fn execute(
     }
 }
 
+#[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(deps: Deps, _env: Env, msg: BenchmarkQueryMsg) -> StdResult<Binary> {
     match msg {
         BenchmarkQueryMsg::StateNumLoad {} => to_binary(&query_state_num_load(deps, _env)?),
