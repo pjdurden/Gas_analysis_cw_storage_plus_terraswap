@@ -43,38 +43,59 @@ pub fn execute(
     msg: BenchmarkExecuteMsg,
 ) -> Result<Response, ContractError> {
     match msg {
-        BenchmarkExecuteMsg::StateNumSave { num_to_save } => {
-            state_num_save(deps, _env, info, num_to_save)
+        BenchmarkExecuteMsg::StateNumSave { num_to_save_start,num_to_save_end } => {
+            state_num_save(deps, _env, info, num_to_save_start,num_to_save_end)
         }
-        BenchmarkExecuteMsg::StateVectorSave { num_to_save } => {
-            state_vector_save(deps, _env, info, num_to_save)
+        BenchmarkExecuteMsg::StateVectorSave { num_to_save_start,num_to_save_end } => {
+            state_vector_save(deps, _env, info, num_to_save_start,num_to_save_end)
         }
-        BenchmarkExecuteMsg::StateNumUpdate { num_to_update } => {
-            state_num_update(deps, _env, info, num_to_update)
+        BenchmarkExecuteMsg::StateNumUpdate { num_to_update_start,num_to_update_end } => {
+            state_num_update(deps, _env, info,num_to_update_start,num_to_update_end)
         }
-        BenchmarkExecuteMsg::StateVectorUpdate { num_to_update } => {
-            state_vector_update(deps, _env, info, num_to_update)
+        BenchmarkExecuteMsg::StateVectorUpdate { num_to_update_start,num_to_update_end } => {
+            state_vector_update(deps, _env, info, num_to_update_start,num_to_update_end)
         }
         BenchmarkExecuteMsg::MapCompositeKeySave {
-            first_key,
-            second_key,
-            value,
-        } => state_composite_key_save(deps, _env, info, first_key, second_key, value),
+            first_key_start,
+            second_key_start,
+            value_start,
+            first_key_end,
+            second_key_end,
+            value_end,
+        } => state_composite_key_save(deps, _env, info, first_key_start,second_key_start,value_start,first_key_end,second_key_end,value_end),
         BenchmarkExecuteMsg::MapCompositeKeyUpdate {
-            first_key,
-            second_key,
-            value,
-        } => state_composite_key_update(deps, _env, info, first_key, second_key, value),
+            first_key_start,
+            second_key_start,
+            value_start,
+            first_key_end,
+            second_key_end,
+            value_end,
+        } => state_composite_key_update(deps, _env, info, first_key_start,second_key_start,value_start,first_key_end,second_key_end,value_end),
         BenchmarkExecuteMsg::MapVectorValueSave {
-            first_key,
-            second_key,
-            value,
-        } => state_vector_value_save(deps, _env, info, first_key, second_key, value),
+            first_key_start,
+            second_key_start,
+            value_start,
+            first_key_end,
+            second_key_end,
+            value_end,
+        } => state_vector_value_save(deps, _env, info, first_key_start,second_key_start,value_start,first_key_end,second_key_end,value_end),
+        BenchmarkExecuteMsg::StateExecNumsLoad{
+
+        }=>state_exec_nums_load(deps, _env, info),
+        BenchmarkExecuteMsg::StateExecVectorsLoad{
+            
+        }=>state_exec_vectors_load(deps, _env, info),
+        BenchmarkExecuteMsg::StateExecVectorsLoadSorted{
+            
+        }=>state_exec_vectors_load_sorted(deps, _env, info),
         BenchmarkExecuteMsg::MapVectorValueUpdate {
-            first_key,
-            second_key,
-            value,
-        } => state_vector_value_update(deps, _env, info, first_key, second_key, value),
+            first_key_start,
+            second_key_start,
+            value_start,
+            first_key_end,
+            second_key_end,
+            value_end,
+        } => state_vector_value_update(deps, _env, info, first_key_start,second_key_start,value_start,first_key_end,second_key_end,value_end),
         BenchmarkExecuteMsg::AddValidator {
             validator_addr,
             vault_denom,
@@ -113,6 +134,53 @@ pub fn query(deps: Deps, _env: Env, msg: BenchmarkQueryMsg) -> StdResult<Binary>
             to_binary(&query_map_vector_value_load(deps, _env, key_to_find)?)
         }
     }
+}
+
+fn state_exec_nums_load(
+    deps: DepsMut ,
+    _env: Env ,
+    _info: MessageInfo ,
+ ) -> Result<Response,ContractError> {
+    let state = STATE.load(deps.storage)?;
+    Ok(Response::default())
+
+}
+
+fn state_exec_vectors_load(
+    deps: DepsMut ,
+    _env: Env ,
+    _info: MessageInfo ,
+ ) -> Result<Response,ContractError> {
+    let state = STATE.load(deps.storage)?;
+    let vector_to_find=state.state_vector;
+    Ok(Response::default())
+
+}
+
+fn state_exec_vectors_load_sorted(
+    deps: DepsMut ,
+    _env: Env ,
+    _info: MessageInfo ,
+ ) -> Result<Response,ContractError> {
+    let state = STATE.load(deps.storage)?;
+    let mut vector_to_find=state.state_vector;
+    vector_to_find.sort();
+    Ok(Response::default())
+
+}
+
+fn state_exec_vectors_save_sorted(
+    deps: DepsMut ,
+    _env: Env ,
+    _info: MessageInfo ,
+ ) -> Result<Response,ContractError> {
+    let mut state = STATE.load(deps.storage)?;
+    let mut vector_to_find=state.state_vector;
+    vector_to_find.sort();
+    state.state_vector=vector_to_find;
+    STATE.save(deps.storage,&state);
+    Ok(Response::default())
+
 }
 
 fn add_validator(
@@ -195,10 +263,14 @@ fn state_num_save(
     deps: DepsMut,
     _env: Env,
     _info: MessageInfo,
-    num_to_save: u64,
+    num_to_save_start:u64,
+    num_to_save_end: u64,
 ) -> Result<Response, ContractError> {
     let mut state = STATE.load(deps.storage)?;
-    state.state_num = num_to_save;
+    for i in (num_to_save_start)..(num_to_save_end+1)
+    {
+        state.state_num = i;
+    }
     STATE.save(deps.storage, &state);
     Ok(Response::default())
 }
@@ -207,10 +279,14 @@ fn state_vector_save(
     deps: DepsMut,
     _env: Env,
     _info: MessageInfo,
-    num_to_save: u64,
+    num_to_save_start:u64,
+    num_to_save_end: u64,
 ) -> Result<Response, ContractError> {
     let mut state = STATE.load(deps.storage)?;
-    state.state_vector.push(num_to_save);
+    for i in (num_to_save_start)..(num_to_save_end+1)
+    {
+        state.state_vector.push(i);
+    }
     STATE.save(deps.storage, &state);
     Ok(Response::default())
 }
@@ -219,12 +295,16 @@ fn state_num_update(
     deps: DepsMut,
     _env: Env,
     _info: MessageInfo,
-    num_to_update: u64,
+    num_to_update_start: u64,
+    num_to_update_end:u64,
 ) -> Result<Response, ContractError> {
-    STATE.update(deps.storage, |mut s| -> StdResult<_> {
-        s.state_num = num_to_update;
-        Ok(s)
-    })?;
+    for x in num_to_update_start..(num_to_update_end+1)
+    {
+        STATE.update(deps.storage, |mut s| -> StdResult<_> {
+            s.state_num = x;
+            Ok(s)
+        })?;
+    }
     Ok(Response::default())
 }
 
@@ -232,12 +312,16 @@ fn state_vector_update(
     deps: DepsMut,
     _env: Env,
     _info: MessageInfo,
-    num_to_update: u64,
+    num_to_update_start: u64,
+    num_to_update_end:u64,
 ) -> Result<Response, ContractError> {
-    STATE.update(deps.storage, |mut s| -> StdResult<_> {
-        s.state_vector.push(num_to_update);
-        Ok(s)
-    })?;
+    for x in num_to_update_start..(num_to_update_end+1)
+    {
+        STATE.update(deps.storage, |mut s| -> StdResult<_> {
+            s.state_vector.push(x);
+            Ok(s)
+        })?;
+    }
     Ok(Response::default())
 }
 
@@ -245,17 +329,30 @@ fn state_composite_key_update(
     deps: DepsMut,
     _env: Env,
     _info: MessageInfo,
-    first_key: u64,
-    second_key: u64,
-    value: u64,
+    first_key_start:u64,
+    second_key_start:u64,
+    value_start:u64,
+    first_key_end:u64,
+    second_key_end:u64,
+    value_end:u64,
 ) -> Result<Response, ContractError> {
     // make sure to save the value at first_key first before updating
     // checking by loading the map will add the gas fees of loading too
-    MAP_COMPOSITE_KEY.update(
-        deps.storage,
-        (U64Key::new(first_key), U64Key::new(second_key)),
-        |_v| -> StdResult<Uint128> { Ok(value.into()) },
-    )?;
+
+    let mut first_key=first_key_start;
+    let mut second_key=second_key_start;
+    for x in value_start..(value_end+1)
+    {
+        MAP_COMPOSITE_KEY.update(
+            deps.storage,
+            (U64Key::new(first_key), U64Key::new(second_key)),
+            |_v| -> StdResult<Uint128> { Ok(x.into()) },
+        )?;
+        first_key=first_key+1;
+        second_key=second_key+1;
+    }
+
+    
     Ok(Response::default())
 }
 
@@ -263,15 +360,26 @@ fn state_composite_key_save(
     deps: DepsMut,
     _env: Env,
     _info: MessageInfo,
-    first_key: u64,
-    second_key: u64,
-    value: u64,
+    first_key_start:u64,
+    second_key_start:u64,
+    value_start:u64,
+    first_key_end:u64,
+    second_key_end:u64,
+    value_end:u64,
 ) -> Result<Response, ContractError> {
-    MAP_COMPOSITE_KEY.save(
-        deps.storage,
-        (U64Key::new(first_key), U64Key::new(second_key)),
-        &(value.into()),
-    )?;
+    let mut first_key=first_key_start;
+    let mut second_key=second_key_start;
+    for x in value_start..(value_end+1)
+    {
+        MAP_COMPOSITE_KEY.save(
+            deps.storage,
+            (U64Key::new(first_key), U64Key::new(second_key)),
+            &(x.into()),
+        )?;
+        first_key=first_key+1;
+        second_key=second_key+1;
+    }
+    
 
     Ok(Response::default())
 }
@@ -280,13 +388,27 @@ fn state_vector_value_save(
     deps: DepsMut,
     _env: Env,
     _info: MessageInfo,
-    first_key: u64,
-    _second_key: u64,
-    value: u64,
+    first_key_start:u64,
+    second_key_start:u64,
+    value_start:u64,
+    first_key_end:u64,
+    second_key_end:u64,
+    value_end:u64,
 ) -> Result<Response, ContractError> {
-    let mut vec_to_save = MAP_VECTOR_VALUE.load(deps.storage, U64Key::new(first_key))?;
-    vec_to_save.push((first_key, value.into()));
-    MAP_VECTOR_VALUE.save(deps.storage, U64Key::new(first_key), &vec_to_save)?;
+    
+    
+    let mut first_key=first_key_start;
+    let mut second_key=second_key_start;
+
+    for x in value_start..(value_end+1)
+    {
+        let mut vec_to_save = MAP_VECTOR_VALUE.load(deps.storage, U64Key::new(first_key))?;
+        vec_to_save.push((second_key, x.into()));
+        MAP_VECTOR_VALUE.save(deps.storage, U64Key::new(first_key), &vec_to_save)?;
+        first_key=first_key+1;
+        second_key=second_key+1;
+    }
+    
     Ok(Response::default())
 }
 
@@ -294,18 +416,32 @@ fn state_vector_value_update(
     deps: DepsMut,
     _env: Env,
     _info: MessageInfo,
-    first_key: u64,
-    _second_key: u64,
-    value: u64,
+    first_key_start:u64,
+    second_key_start:u64,
+    value_start:u64,
+    first_key_end:u64,
+    second_key_end:u64,
+    value_end:u64,
 ) -> Result<Response, ContractError> {
     // save the value in map before updating
-    let mut vec_to_update = MAP_VECTOR_VALUE.load(deps.storage, U64Key::new(first_key))?;
-    vec_to_update.push((first_key, value.into()));
-    MAP_VECTOR_VALUE.update(
-        deps.storage,
-        U64Key::new(first_key),
-        |_v| -> StdResult<Vec<(u64, Uint128)>> { Ok(vec_to_update) },
-    )?;
+
+    let mut first_key=first_key_start;
+    let mut second_key=second_key_start;
+
+    for x in value_start..(value_end+1)
+    {
+        let mut vec_to_update = MAP_VECTOR_VALUE.load(deps.storage, U64Key::new(first_key))?;
+        vec_to_update.push((second_key, x.into()));
+        MAP_VECTOR_VALUE.update(
+            deps.storage,
+            U64Key::new(first_key),
+            |_v| -> StdResult<Vec<(u64, Uint128)>> { Ok(vec_to_update) },
+        )?;
+        first_key=first_key+1;
+        second_key=second_key+1;
+    }
+
+   
     Ok(Response::default())
 }
 
