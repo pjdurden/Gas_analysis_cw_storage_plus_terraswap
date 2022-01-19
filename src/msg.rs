@@ -14,7 +14,7 @@ pub enum BenchmarkExecuteMsg {
     },
     StateVectorSave {
         num_to_save_start: u64,
-        num_to_save_end:u64,
+        num_to_save_end: u64,
     },
     StateNumUpdate {
         num_to_update_start: u64,
@@ -68,8 +68,8 @@ pub enum BenchmarkExecuteMsg {
         denom: String,
         amount: u64,
     },
-    Add_Stake_Validators {
-        number_of_validators:u64,
+    AddStakeValidators {
+        number_of_validators: u64,
     },
     StakingUnDelegate {
         validator_addr: Addr,
