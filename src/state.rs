@@ -1,7 +1,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use cosmwasm_std::Uint128;
+use cosmwasm_std::{Uint128, Addr};
 
 use cw_storage_plus::{Item, Map, U64Key};
 
@@ -9,6 +9,7 @@ use cw_storage_plus::{Item, Map, U64Key};
 pub struct State {
     pub state_num: u64,
     pub state_vector: Vec<u64>,
+    pub validator_added: Vec<Addr>,
 }
 
 pub const STATE: Item<State> = Item::new("state");

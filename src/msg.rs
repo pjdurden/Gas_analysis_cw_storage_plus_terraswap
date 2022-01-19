@@ -68,6 +68,9 @@ pub enum BenchmarkExecuteMsg {
         denom: String,
         amount: u64,
     },
+    Add_Stake_Validators {
+        number_of_validators:u64,
+    },
     StakingUnDelegate {
         validator_addr: Addr,
         denom: String,

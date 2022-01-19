@@ -1,0 +1,14 @@
+/home/pjdurden/Desktop/gas_fees_benchmark/target/debug/deps/url-2d8583a819da2d46.rmeta: /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/lib.rs /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/encoding.rs /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/host.rs /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/parser.rs /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/urlutils.rs /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/percent_encoding.rs /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/encode_sets.rs /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/form_urlencoded.rs /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/punycode.rs /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/format.rs
+
+/home/pjdurden/Desktop/gas_fees_benchmark/target/debug/deps/url-2d8583a819da2d46.d: /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/lib.rs /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/encoding.rs /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/host.rs /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/parser.rs /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/urlutils.rs /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/percent_encoding.rs /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/encode_sets.rs /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/form_urlencoded.rs /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/punycode.rs /home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/format.rs
+
+/home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/lib.rs:
+/home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/encoding.rs:
+/home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/host.rs:
+/home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/parser.rs:
+/home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/urlutils.rs:
+/home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/percent_encoding.rs:
+/home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/encode_sets.rs:
+/home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/form_urlencoded.rs:
+/home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/punycode.rs:
+/home/pjdurden/.cargo/registry/src/github.com-1ecc6299db9ec823/url-0.2.38/src/format.rs:

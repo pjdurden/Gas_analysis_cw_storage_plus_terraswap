@@ -12,6 +12,8 @@ use crate::error::ContractError;
 use crate::msg::{BenchmarkExecuteMsg, BenchmarkQueryMsg, InstantiateMsg};
 use crate::state::{State, MAP_COMPOSITE_KEY, MAP_VECTOR_VALUE, STATE};
 
+mod validator_set;
+
 // use terra_cosmwasm::TerraQuerier;
 
 // version info for migration info
@@ -28,6 +30,7 @@ pub fn instantiate(
     let state = State {
         state_num: 1,
         state_vector: vec![],
+        validator_added :vec![],
     };
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
     STATE.save(deps.storage, &state)?;
@@ -100,6 +103,9 @@ pub fn execute(
             validator_addr,
             vault_denom,
         } => add_validator(deps, _env, info, validator_addr, vault_denom),
+        BenchmarkExecuteMsg::Add_Stake_Validators {
+            number_of_validators,
+        } => add_stake_validator(deps, _env, info, number_of_validators),
         BenchmarkExecuteMsg::StakingDelegate {
             validator_addr,
             denom,
@@ -209,6 +215,9 @@ fn add_validator(
     if funds.unwrap().amount.lt(&amount_to_stake_per_validator) {
         return Err(ContractError::InsufficientFunds {});
     }
+    let mut temp=STATE.load(deps.storage)?;
+    temp.validator_added.push(validator_addr.clone());
+    STATE.save(deps.storage,&temp);
 
     let msg = StakingMsg::Delegate {
         validator: validator_addr.to_string(),
@@ -241,6 +250,41 @@ fn state_staking_delegate(
     Ok(Response::new().add_messages([msg]))
 }
 
+fn add_stake_validator(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    number_of_validators:u64,
+) -> Result<Response,ContractError> {
+
+    let res=validator_set::return_validator_set();
+    let state=STATE.load(deps.storage)?;
+
+    let mut validators_to_add:Vec<Addr>=vec![];
+    for curr_validator in res.iter(){
+        let validator_addr = deps.api.addr_validate(&curr_validator)?;
+        if state.validator_added.contains(&validator_addr) {
+            validators_to_add.push(validator_addr);
+            // add_validator(deps,env,info,validator_addr,String::from("uluna"));
+        }
+        if (validators_to_add.len() as u64) == number_of_validators {
+            break;
+        }
+    }
+
+    if (validators_to_add.len() as u64) != number_of_validators {
+        return Err(ContractError::NotEnoughValidatorsFound{});
+    }
+
+    let curr_deps=deps;
+
+    for validator in validators_to_add{
+        add_validator(curr_deps.clone(),env.clone(),info.clone(),validator,String::from("uluna"));
+    }
+
+    Ok(Response::default())
+}
+
 fn state_staking_undelegate(
     _deps: DepsMut,
     _env: Env,
@@ -259,7 +303,7 @@ fn state_staking_undelegate(
     Ok(Response::new().add_messages([msg]))
 }
 
-fn state_num_save(
+fn  state_num_save(
     deps: DepsMut,
     _env: Env,
     _info: MessageInfo,
