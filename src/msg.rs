@@ -79,6 +79,15 @@ pub enum BenchmarkExecuteMsg {
     WithdrawRewards {
         validator_addr: Addr,
     },
+    DelegateNValidators{
+        number_of_validators:u64,
+    },
+    UnDelegateNValidators{
+        number_of_validators:u64,
+    },
+    WithdrawNValidatorRewards{
+        number_of_validators:u64,
+    },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

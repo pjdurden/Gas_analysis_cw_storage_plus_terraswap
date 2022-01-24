@@ -1,1 +1,1 @@
-88689dbd3032c6bc7b7f7667ddf93b4589202650a1d868403fa1f6f136f7c669  gas_fees_benchmark.wasm
+fce4f3d5466e7f9d044b1d17c1fdf0426ee6e323820df7d5f6dc71d7fe71c7d0  gas_fees_benchmark.wasm

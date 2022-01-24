@@ -41,7 +41,7 @@ pub fn instantiate(
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn execute(
     deps: DepsMut,
-    _env: Env,
+    env: Env,
     info: MessageInfo,
     msg: BenchmarkExecuteMsg,
 ) -> Result<Response, ContractError> {
@@ -49,19 +49,19 @@ pub fn execute(
         BenchmarkExecuteMsg::StateNumSave {
             num_to_save_start,
             num_to_save_end,
-        } => state_num_save(deps, _env, info, num_to_save_start, num_to_save_end),
+        } => state_num_save(deps, env, info, num_to_save_start, num_to_save_end),
         BenchmarkExecuteMsg::StateVectorSave {
             num_to_save_start,
             num_to_save_end,
-        } => state_vector_save(deps, _env, info, num_to_save_start, num_to_save_end),
+        } => state_vector_save(deps, env, info, num_to_save_start, num_to_save_end),
         BenchmarkExecuteMsg::StateNumUpdate {
             num_to_update_start,
             num_to_update_end,
-        } => state_num_update(deps, _env, info, num_to_update_start, num_to_update_end),
+        } => state_num_update(deps, env, info, num_to_update_start, num_to_update_end),
         BenchmarkExecuteMsg::StateVectorUpdate {
             num_to_update_start,
             num_to_update_end,
-        } => state_vector_update(deps, _env, info, num_to_update_start, num_to_update_end),
+        } => state_vector_update(deps, env, info, num_to_update_start, num_to_update_end),
         BenchmarkExecuteMsg::MapCompositeKeySave {
             first_key_start,
             second_key_start,
@@ -71,7 +71,7 @@ pub fn execute(
             value_end,
         } => state_composite_key_save(
             deps,
-            _env,
+            env,
             info,
             first_key_start,
             second_key_start,
@@ -89,7 +89,7 @@ pub fn execute(
             value_end,
         } => state_composite_key_update(
             deps,
-            _env,
+            env,
             info,
             first_key_start,
             second_key_start,
@@ -107,7 +107,7 @@ pub fn execute(
             value_end,
         } => state_vector_value_save(
             deps,
-            _env,
+            env,
             info,
             first_key_start,
             second_key_start,
@@ -116,10 +116,10 @@ pub fn execute(
             second_key_end,
             value_end,
         ),
-        BenchmarkExecuteMsg::StateExecNumsLoad {} => state_exec_nums_load(deps, _env, info),
-        BenchmarkExecuteMsg::StateExecVectorsLoad {} => state_exec_vectors_load(deps, _env, info),
+        BenchmarkExecuteMsg::StateExecNumsLoad {} => state_exec_nums_load(deps, env, info),
+        BenchmarkExecuteMsg::StateExecVectorsLoad {} => state_exec_vectors_load(deps, env, info),
         BenchmarkExecuteMsg::StateExecVectorsLoadSorted {} => {
-            state_exec_vectors_load_sorted(deps, _env, info)
+            state_exec_vectors_load_sorted(deps, env, info)
         }
         BenchmarkExecuteMsg::MapVectorValueUpdate {
             first_key_start,
@@ -130,7 +130,7 @@ pub fn execute(
             value_end,
         } => state_vector_value_update(
             deps,
-            _env,
+            env,
             info,
             first_key_start,
             second_key_start,
@@ -142,23 +142,33 @@ pub fn execute(
         BenchmarkExecuteMsg::AddValidator {
             validator_addr,
             vault_denom,
-        } => add_validator(deps.storage, _env, info, validator_addr, vault_denom),
+        } => add_validator(deps.storage, env, info, validator_addr, vault_denom),
         BenchmarkExecuteMsg::AddStakeValidators {
             number_of_validators,
-        } => add_stake_validator(deps, _env, info, number_of_validators),
+        } => add_stake_validator(deps, env, info, number_of_validators),
         BenchmarkExecuteMsg::StakingDelegate {
             validator_addr,
             denom,
             amount,
-        } => state_staking_delegate(deps, _env, info, validator_addr, denom, amount),
+        } => state_staking_delegate(deps.storage, env, info, validator_addr, denom, amount),
         BenchmarkExecuteMsg::StakingUnDelegate {
             validator_addr,
             denom,
             amount,
-        } => state_staking_undelegate(deps, _env, info, validator_addr, denom, amount),
+        } => state_staking_undelegate(deps.storage, env, info, validator_addr, denom, amount),
+        BenchmarkExecuteMsg::DelegateNValidators{
+            number_of_validators
+        } => delegate_n_validators(deps,env,info,number_of_validators),
+        BenchmarkExecuteMsg::UnDelegateNValidators{
+            number_of_validators
+        } => undelegate_n_validators(deps,env,info,number_of_validators),
+        BenchmarkExecuteMsg::WithdrawNValidatorRewards{
+            number_of_validators
+        } => state_n_validator_withdraw_rewards(deps,env,info,number_of_validators),
         BenchmarkExecuteMsg::WithdrawRewards { validator_addr } => {
-            state_withdraw_rewards(deps, _env, info, validator_addr)
+            state_withdraw_rewards(deps.storage, env, info, validator_addr)
         }
+        
     }
 }
 
@@ -264,7 +274,7 @@ fn add_validator(
 }
 
 fn state_staking_delegate(
-    _deps: DepsMut,
+    storage: &mut dyn Storage,
     _env: Env,
     _info: MessageInfo,
     validator_addr: Addr,
@@ -293,7 +303,9 @@ fn add_stake_validator(
 
     let mut validators_to_add: Vec<Addr> = vec![];
     for curr_validator in res.iter() {
-        let validator_addr = deps.api.addr_validate(&curr_validator)?;
+        let currs_validators=&curr_validator[..];
+
+        let validator_addr = deps.api.addr_validate(currs_validators)?;
         if !(state.validator_added.contains(&validator_addr)) {
             validators_to_add.push(validator_addr);
         }
@@ -326,7 +338,7 @@ fn add_stake_validator(
 }
 
 fn state_staking_undelegate(
-    _deps: DepsMut,
+    storage: &mut dyn Storage,
     _env: Env,
     _info: MessageInfo,
     validator_addr: Addr,
@@ -517,7 +529,7 @@ fn state_vector_value_update(
 }
 
 fn state_withdraw_rewards(
-    _deps: DepsMut,
+    storage: &mut dyn Storage,
     _env: Env,
     _info: MessageInfo,
     validator_addr: Addr,
@@ -566,4 +578,66 @@ fn query_map_vector_value_load(
 ) -> StdResult<Vec<(u64, Uint128)>> {
     let value_to_find = MAP_VECTOR_VALUE.load(deps.storage, U64Key::new(num_to_find))?;
     Ok(value_to_find)
+}
+
+fn delegate_n_validators(
+    deps:DepsMut,
+    env:Env,
+    info:MessageInfo,
+    number_of_validators:u64,
+) -> Result<Response,ContractError> {
+    let mut s=STATE.load(deps.storage)?;
+    let mut currnum=0;
+    let storage=deps.storage;
+    for curr_validator in s.validator_added.iter(){
+        state_staking_delegate(storage, env.clone(), info.clone(), curr_validator.clone(), 
+        "uluna".to_string(), 10);
+        currnum+=1;
+        if currnum==number_of_validators{
+            break;
+        }
+    }
+
+    Ok(Response::default())
+}
+
+fn undelegate_n_validators(
+    deps:DepsMut,
+    env:Env,
+    info:MessageInfo,
+    number_of_validators:u64,
+) -> Result<Response,ContractError> {
+    let mut s=STATE.load(deps.storage)?;
+    let mut currnum=0;
+    let storage=deps.storage;
+    for curr_validator in s.validator_added.iter(){
+        state_staking_undelegate(storage, env.clone(), info.clone(), curr_validator.clone(), 
+        "uluna".to_string(), 10);
+        currnum+=1;
+        if currnum==number_of_validators{
+            break;
+        }
+    }
+
+    Ok(Response::default())
+}
+
+fn state_n_validator_withdraw_rewards(
+    deps:DepsMut,
+    env:Env,
+    info:MessageInfo,
+    number_of_validators:u64,
+) -> Result<Response,ContractError> {
+    let mut s=STATE.load(deps.storage)?;
+    let mut currnum=0;
+    let storage=deps.storage;
+    for curr_validator in s.validator_added.iter(){
+        state_withdraw_rewards(storage, env.clone(), info.clone(), curr_validator.clone());
+        currnum+=1;
+        if currnum==number_of_validators{
+            break;
+        }
+    }
+
+    Ok(Response::default())
 }
