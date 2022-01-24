@@ -303,9 +303,9 @@ fn add_stake_validator(
 
     let mut validators_to_add: Vec<Addr> = vec![];
     for curr_validator in res.iter() {
-        let currs_validators=&curr_validator[..];
+        // let currs_validators=&curr_validator[..];
 
-        let validator_addr = deps.api.addr_validate(currs_validators)?;
+        let validator_addr = Addr::unchecked(curr_validator);
         if !(state.validator_added.contains(&validator_addr)) {
             validators_to_add.push(validator_addr);
         }
