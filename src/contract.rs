@@ -294,7 +294,7 @@ fn add_stake_validator(
     let mut validators_to_add: Vec<Addr> = vec![];
     for curr_validator in res.iter() {
         let validator_addr = deps.api.addr_validate(&curr_validator)?;
-        if state.validator_added.contains(&validator_addr) {
+        if !(state.validator_added.contains(&validator_addr)) {
             validators_to_add.push(validator_addr);
         }
         if (validators_to_add.len() as u64) == number_of_validators {
@@ -306,11 +306,17 @@ fn add_stake_validator(
         return Err(ContractError::NotEnoughValidatorsFound {});
     }
 
+    let tempcoin=Coin{
+        denom: String::from("uluna"),
+        amount: Uint128::new(10),
+    };
+    let mut infos=info.clone();
+    infos.funds.push(tempcoin);
     for validator in validators_to_add {
         add_validator(
             storage,
             env.clone(),
-            info.clone(),
+            infos.clone(),
             validator,
             String::from("uluna"),
         );
