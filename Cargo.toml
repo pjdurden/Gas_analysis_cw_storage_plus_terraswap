@@ -39,10 +39,12 @@ optimize = """docker run --rm -v "$(pwd)":/code \
   cosmwasm/rust-optimizer:0.12.3
 """
 
+
 [dependencies]
 cosmwasm-std = { version = "0.16.3" ,features=["staking"] }
 cosmwasm-storage = { version = "0.16.0" }
 cw-storage-plus = "0.8.0"
+terra-cosmwasm = { version = "2.1.0" }
 cw2 = "0.8.1"
 schemars = "0.8.3"
 serde = { version = "1.0.127", default-features = false, features = ["derive"] }

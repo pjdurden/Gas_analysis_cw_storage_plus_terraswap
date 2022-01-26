@@ -3,8 +3,9 @@ use cosmwasm_std::entry_point;
 
 use cosmwasm_std::{
     to_binary, Addr, Binary, Coin, Deps, DepsMut, DistributionMsg, Env, MessageInfo, Response,
-    StakingMsg, StdResult, Storage, Uint128,
+    StakingMsg, StdResult, Storage, Uint128, QueryResponse,
 };
+
 use cw2::set_contract_version;
 use cw_storage_plus::U64Key;
 
@@ -173,7 +174,7 @@ pub fn execute(
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
-pub fn query(deps: Deps, _env: Env, msg: BenchmarkQueryMsg) -> StdResult<Binary> {
+pub fn query(deps: Deps, _env: Env, msg: BenchmarkQueryMsg) -> StdResult<QueryResponse> {
     match msg {
         BenchmarkQueryMsg::StateNumLoad {} => to_binary(&query_state_num_load(deps, _env)?),
         BenchmarkQueryMsg::StateVectorLoad {} => to_binary(&query_state_vector_load(deps, _env)?),
