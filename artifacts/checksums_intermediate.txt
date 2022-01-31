@@ -1,1 +1,1 @@
-4246912258611b183d833adf0add7f2aa878415bea0b5e184278dd91d86c57dd  ./target/wasm32-unknown-unknown/release/gas_fees_benchmark.wasm
+e2d6cb7caefa556a37a31d51c41f9849a4433b6eff7246f92b117556c25fdcfb  ./target/wasm32-unknown-unknown/release/gas_fees_benchmark.wasm

@@ -320,7 +320,9 @@ fn add_stake_validator(
         ));
     }
 
-    Ok(Response::new().add_messages(msgs))
+    Ok(Response::new()
+        .add_messages(msgs)
+        .add_attribute("method", "add_validator"))
 }
 
 fn state_staking_undelegate(
