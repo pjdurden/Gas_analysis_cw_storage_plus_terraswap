@@ -140,23 +140,9 @@ pub fn execute(
             second_key_end,
             value_end,
         ),
-        BenchmarkExecuteMsg::AddValidator {
-            validator_addr,
-            vault_denom,
-        } => add_validator(deps.storage, env, info, validator_addr, vault_denom),
         BenchmarkExecuteMsg::AddStakeValidators {
             number_of_validators,
         } => add_stake_validator(deps, env, info, number_of_validators),
-        BenchmarkExecuteMsg::StakingDelegate {
-            validator_addr,
-            denom,
-            amount,
-        } => state_staking_delegate(deps.storage, env, info, validator_addr, denom, amount),
-        BenchmarkExecuteMsg::StakingUnDelegate {
-            validator_addr,
-            denom,
-            amount,
-        } => state_staking_undelegate(deps.storage, env, info, validator_addr, denom, amount),
         BenchmarkExecuteMsg::DelegateNValidators {
             number_of_validators,
         } => delegate_n_validators(deps, env, info, number_of_validators),
@@ -166,9 +152,6 @@ pub fn execute(
         BenchmarkExecuteMsg::WithdrawNValidatorRewards {
             number_of_validators,
         } => state_n_validator_withdraw_rewards(deps, env, info, number_of_validators),
-        BenchmarkExecuteMsg::WithdrawRewards { validator_addr } => {
-            state_withdraw_rewards(deps.storage, env, info, validator_addr)
-        }
     }
 }
 
@@ -243,24 +226,27 @@ fn add_validator(
     info: MessageInfo,
     validator_addr: Addr,
     vault_denom: String,
-) -> Result<Response, ContractError> {
+) -> StakingMsg {
     // check if the validator exists in the blockchain
 
     let amount_to_stake_per_validator = Uint128::new(10);
 
     let funds = info.funds.first();
-    if funds.is_none() {
-        return Err(ContractError::InsufficientFunds {});
-    }
 
-    if funds.unwrap().amount.lt(&amount_to_stake_per_validator) {
-        return Err(ContractError::InsufficientFunds {});
-    }
-    let mut temp = STATE.load(storage)?;
+    // if funds.is_none() {
+    //     return Err(ContractError::InsufficientFunds {});
+    // already checking this inside add_stake_validators
+    // }
+
+    // if funds.unwrap().amount.lt(&amount_to_stake_per_validator) {
+    //     return Err(ContractError::InsufficientFunds {});
+    // passing 10 ulna as amount to stake per validator
+    // }
+    let mut temp = STATE.load(storage).unwrap();
     temp.validator_added.push(validator_addr.clone());
     STATE.save(storage, &temp);
 
-    let msg = StakingMsg::Delegate {
+    return StakingMsg::Delegate {
         validator: validator_addr.to_string(),
         amount: Coin {
             denom: vault_denom.clone(),
@@ -268,9 +254,9 @@ fn add_validator(
         },
     };
 
-    Ok(Response::new()
-        .add_messages([msg])
-        .add_attribute("method", "add_validator"))
+    // Ok(Response::new()
+    //     .add_messages([msg])
+    //     .add_attribute("method", "add_validator"))
 }
 
 fn state_staking_delegate(
@@ -323,17 +309,18 @@ fn add_stake_validator(
     };
     let mut infos = info.clone();
     infos.funds.push(tempcoin);
+    let mut msgs = vec![];
     for validator in validators_to_add {
-        add_validator(
+        msgs.push(add_validator(
             storage,
             env.clone(),
             infos.clone(),
             validator,
             String::from("uluna"),
-        );
+        ));
     }
 
-    Ok(Response::default())
+    Ok(Response::new().add_messages(msgs))
 }
 
 fn state_staking_undelegate(
@@ -630,7 +617,7 @@ fn undelegate_n_validators(
         }
     }
 
-    Ok(Response::default())
+    Ok(Response::new().add_messages(msgs))
 }
 
 fn state_n_validator_withdraw_rewards(
@@ -656,5 +643,5 @@ fn state_n_validator_withdraw_rewards(
         }
     }
 
-    Ok(Response::default())
+    Ok(Response::new().add_messages(msgs))
 }

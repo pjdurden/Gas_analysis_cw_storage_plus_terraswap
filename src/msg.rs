@@ -59,25 +59,8 @@ pub enum BenchmarkExecuteMsg {
     StateExecNumsLoad {},
     StateExecVectorsLoad {},
     StateExecVectorsLoadSorted {},
-    AddValidator {
-        validator_addr: Addr,
-        vault_denom: String,
-    },
-    StakingDelegate {
-        validator_addr: Addr,
-        denom: String,
-        amount: u64,
-    },
     AddStakeValidators {
         number_of_validators: u64,
-    },
-    StakingUnDelegate {
-        validator_addr: Addr,
-        denom: String,
-        amount: u64,
-    },
-    WithdrawRewards {
-        validator_addr: Addr,
     },
     DelegateNValidators {
         number_of_validators: u64,
