@@ -2,8 +2,8 @@
 use cosmwasm_std::entry_point;
 
 use cosmwasm_std::{
-    to_binary, Addr, Binary, Coin, Deps, DepsMut, DistributionMsg, Env, MessageInfo, Response,
-    StakingMsg, StdResult, Storage, Uint128, QueryResponse,
+    to_binary, Addr, Binary, Coin, Deps, DepsMut, DistributionMsg, Env, MessageInfo, QueryResponse,
+    Response, StakingMsg, StdResult, Storage, Uint128,
 };
 
 use cw2::set_contract_version;
@@ -157,19 +157,18 @@ pub fn execute(
             denom,
             amount,
         } => state_staking_undelegate(deps.storage, env, info, validator_addr, denom, amount),
-        BenchmarkExecuteMsg::DelegateNValidators{
-            number_of_validators
-        } => delegate_n_validators(deps,env,info,number_of_validators),
-        BenchmarkExecuteMsg::UnDelegateNValidators{
-            number_of_validators
-        } => undelegate_n_validators(deps,env,info,number_of_validators),
-        BenchmarkExecuteMsg::WithdrawNValidatorRewards{
-            number_of_validators
-        } => state_n_validator_withdraw_rewards(deps,env,info,number_of_validators),
+        BenchmarkExecuteMsg::DelegateNValidators {
+            number_of_validators,
+        } => delegate_n_validators(deps, env, info, number_of_validators),
+        BenchmarkExecuteMsg::UnDelegateNValidators {
+            number_of_validators,
+        } => undelegate_n_validators(deps, env, info, number_of_validators),
+        BenchmarkExecuteMsg::WithdrawNValidatorRewards {
+            number_of_validators,
+        } => state_n_validator_withdraw_rewards(deps, env, info, number_of_validators),
         BenchmarkExecuteMsg::WithdrawRewards { validator_addr } => {
             state_withdraw_rewards(deps.storage, env, info, validator_addr)
         }
-        
     }
 }
 
@@ -281,15 +280,14 @@ fn state_staking_delegate(
     validator_addr: Addr,
     vault_denom: String,
     amount_to_delegate: u64,
-) -> Result<Response, ContractError> {
-    let msg = StakingMsg::Delegate {
+) -> StakingMsg {
+    return StakingMsg::Delegate {
         validator: validator_addr.to_string(),
         amount: Coin {
             denom: vault_denom.clone(),
             amount: Uint128::new(amount_to_delegate.into()),
         },
     };
-    Ok(Response::new().add_messages([msg]))
 }
 
 fn add_stake_validator(
@@ -319,11 +317,11 @@ fn add_stake_validator(
         return Err(ContractError::NotEnoughValidatorsFound {});
     }
 
-    let tempcoin=Coin{
+    let tempcoin = Coin {
         denom: String::from("uluna"),
         amount: Uint128::new(10),
     };
-    let mut infos=info.clone();
+    let mut infos = info.clone();
     infos.funds.push(tempcoin);
     for validator in validators_to_add {
         add_validator(
@@ -345,15 +343,14 @@ fn state_staking_undelegate(
     validator_addr: Addr,
     vault_denom: String,
     amount_to_delegate: u64,
-) -> Result<Response, ContractError> {
-    let msg = StakingMsg::Undelegate {
+) -> StakingMsg {
+    return StakingMsg::Undelegate {
         validator: validator_addr.to_string(),
         amount: Coin {
             denom: vault_denom.clone(),
             amount: Uint128::new(amount_to_delegate.into()),
         },
     };
-    Ok(Response::new().add_messages([msg]))
 }
 
 fn state_num_save(
@@ -534,12 +531,11 @@ fn state_withdraw_rewards(
     _env: Env,
     _info: MessageInfo,
     validator_addr: Addr,
-) -> Result<Response, ContractError> {
+) -> DistributionMsg {
     // make sure the validator is added first
-    let msg = DistributionMsg::WithdrawDelegatorReward {
+    return DistributionMsg::WithdrawDelegatorReward {
         validator: validator_addr.to_string(),
     };
-    Ok(Response::new().add_messages([msg]))
 }
 
 fn query_state_num_load(deps: Deps, _env: Env) -> StdResult<u64> {
@@ -582,40 +578,54 @@ fn query_map_vector_value_load(
 }
 
 fn delegate_n_validators(
-    deps:DepsMut,
-    env:Env,
-    info:MessageInfo,
-    number_of_validators:u64,
-) -> Result<Response,ContractError> {
-    let mut s=STATE.load(deps.storage)?;
-    let mut currnum=0;
-    let storage=deps.storage;
-    for curr_validator in s.validator_added.iter(){
-        state_staking_delegate(storage, env.clone(), info.clone(), curr_validator.clone(), 
-        "uluna".to_string(), 10);
-        currnum+=1;
-        if currnum==number_of_validators{
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    number_of_validators: u64,
+) -> Result<Response, ContractError> {
+    let mut s = STATE.load(deps.storage)?;
+    let mut currnum = 0;
+    let storage = deps.storage;
+    let mut msgs = vec![];
+    for curr_validator in s.validator_added.iter() {
+        msgs.push(state_staking_delegate(
+            storage,
+            env.clone(),
+            info.clone(),
+            curr_validator.clone(),
+            "uluna".to_string(),
+            10,
+        ));
+        currnum += 1;
+        if currnum == number_of_validators {
             break;
         }
     }
 
-    Ok(Response::default())
+    Ok(Response::new().add_messages(msgs))
 }
 
 fn undelegate_n_validators(
-    deps:DepsMut,
-    env:Env,
-    info:MessageInfo,
-    number_of_validators:u64,
-) -> Result<Response,ContractError> {
-    let mut s=STATE.load(deps.storage)?;
-    let mut currnum=0;
-    let storage=deps.storage;
-    for curr_validator in s.validator_added.iter(){
-        state_staking_undelegate(storage, env.clone(), info.clone(), curr_validator.clone(), 
-        "uluna".to_string(), 10);
-        currnum+=1;
-        if currnum==number_of_validators{
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    number_of_validators: u64,
+) -> Result<Response, ContractError> {
+    let mut s = STATE.load(deps.storage)?;
+    let mut currnum = 0;
+    let storage = deps.storage;
+    let mut msgs = vec![];
+    for curr_validator in s.validator_added.iter() {
+        msgs.push(state_staking_undelegate(
+            storage,
+            env.clone(),
+            info.clone(),
+            curr_validator.clone(),
+            "uluna".to_string(),
+            10,
+        ));
+        currnum += 1;
+        if currnum == number_of_validators {
             break;
         }
     }
@@ -624,18 +634,24 @@ fn undelegate_n_validators(
 }
 
 fn state_n_validator_withdraw_rewards(
-    deps:DepsMut,
-    env:Env,
-    info:MessageInfo,
-    number_of_validators:u64,
-) -> Result<Response,ContractError> {
-    let mut s=STATE.load(deps.storage)?;
-    let mut currnum=0;
-    let storage=deps.storage;
-    for curr_validator in s.validator_added.iter(){
-        state_withdraw_rewards(storage, env.clone(), info.clone(), curr_validator.clone());
-        currnum+=1;
-        if currnum==number_of_validators{
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    number_of_validators: u64,
+) -> Result<Response, ContractError> {
+    let mut s = STATE.load(deps.storage)?;
+    let mut currnum = 0;
+    let storage = deps.storage;
+    let mut msgs = vec![];
+    for curr_validator in s.validator_added.iter() {
+        msgs.push(state_withdraw_rewards(
+            storage,
+            env.clone(),
+            info.clone(),
+            curr_validator.clone(),
+        ));
+        currnum += 1;
+        if currnum == number_of_validators {
             break;
         }
     }
