@@ -1,3 +1,5 @@
+use std::ptr::eq;
+
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
 
@@ -474,7 +476,11 @@ fn state_vector_value_save(
     let mut second_key = second_key_start;
 
     for x in value_start..(value_end + 1) {
-        let mut vec_to_save = MAP_VECTOR_VALUE.load(deps.storage, U64Key::new(first_key))?;
+        let mut vec_to_load = MAP_VECTOR_VALUE.may_load(deps.storage, U64Key::new(first_key))?;
+        let mut vec_to_save=vec![];
+        if !(vec_to_load.is_none()) {
+            vec_to_save=vec_to_load.unwrap();
+        }
         vec_to_save.push((second_key, x.into()));
         MAP_VECTOR_VALUE.save(deps.storage, U64Key::new(first_key), &vec_to_save)?;
         first_key = first_key + 1;
@@ -501,7 +507,12 @@ fn state_vector_value_update(
     let mut second_key = second_key_start;
 
     for x in value_start..(value_end + 1) {
-        let mut vec_to_update = MAP_VECTOR_VALUE.load(deps.storage, U64Key::new(first_key))?;
+        let mut vec_to_load = MAP_VECTOR_VALUE.may_load(deps.storage, U64Key::new(first_key))?;
+        let mut vec_to_update=vec![];
+        if !(vec_to_load.is_none()) {
+            vec_to_update=vec_to_load.unwrap();
+        }
+        vec_to_update.push((second_key, x.into()));
         vec_to_update.push((second_key, x.into()));
         MAP_VECTOR_VALUE.update(
             deps.storage,
